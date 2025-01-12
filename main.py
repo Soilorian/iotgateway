@@ -1,5 +1,5 @@
 def main():
-    pass
+    from infra import coapgateway, mqttgateway, amqpgateway
 
 
 if __name__ == '__main__':
