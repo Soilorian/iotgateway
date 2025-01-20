@@ -4,7 +4,7 @@ import threading
 import paho.mqtt.client as mqtt
 
 # MQTT Configuration
-MQTT_BROKER = "mqtt.example.com"
+MQTT_BROKER = "127.0.0.1"
 MQTT_PORT = 1883
 MQTT_TOPIC = "example/topic"
 

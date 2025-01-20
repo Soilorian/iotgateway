@@ -2,7 +2,7 @@ import pika
 import threading
 
 # AMQP Configuration
-AMQP_BROKER = "amqp.example.com"
+AMQP_BROKER = "127.0.0.1"
 AMQP_PORT = 5672
 AMQP_QUEUE = "example_queue"
 
