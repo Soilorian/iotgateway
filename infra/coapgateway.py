@@ -1,46 +1,29 @@
-import threading
-from aiocoap import Context, Message
-import asyncio
+from config.log import logger
+from infra.packetlistener import start_packet_listener
+from domain.valueobject import networkprotocol, transportprotocol
 
 
-# Class representing the CoAP server
-class CoAPServer:
-    def __init__(self, bind_address="0.0.0.0", port=5683):
-        self.bind_address = bind_address
-        self.port = port
-        self.protocol = None
+def run_coap_gateway(receive_buffer=4096):
+    def target_function(server_socket, client_address):
+        logger.info(f"CoAP message received from {client_address}")
+        try:
+            while True:
+                data, address = server_socket.recvfrom(receive_buffer)
+                if not data:
+                    logger.warning("No CoAP data received, client might have disconnected.")
+                    break
 
-    async def start(self):
-        # Create the CoAP server context
-        self.protocol = await Context.create_server_context(self, bind=(self.bind_address, self.port))
-        print(f"CoAP: Listening for messages on {self.bind_address}:{self.port}")
+                logger.info(f"Received CoAP data from {address}:")
+                print(data)
 
-    async def render_post(self, request):
-        # Handle POST requests
-        payload = request.payload.decode("utf-8")
-        print(f"CoAP: Received message: {payload}")
-        return Message(code=2.04, payload=b"Message received")
+                ack_message = b"\x60\x00\x00\x00"
+                server_socket.sendto(ack_message, address)
+                logger.info(f"Sent acknowledgment to {address}")
 
+        except Exception as e:
+            logger.warning(f"Error handling CoAP message from {client_address}: {e}")
 
-# Function to start the CoAP server
-async def coap_receiver():
-    server = CoAPServer()
-    await server.start()
-
-
-# Start the CoAP receiver in a separate thread
-def start_coap_receiver():
-    coap_thread = threading.Thread(target=lambda: asyncio.run(coap_receiver()), daemon=True)
-    coap_thread.start()
-    print("CoAP receiver started.")
-
-
-# Start the server
-if __name__ == "__main__":
-    start_coap_receiver()
-    # Keep the main thread alive
-    try:
-        while True:
-            pass
-    except KeyboardInterrupt:
-        print("\nCoAP server shutting down.")
+    start_packet_listener(port=5683,
+                          target_function=target_function,
+                          network_protocol=networkprotocol.IPv4,
+                          transport_protocol=transportprotocol.UDP)

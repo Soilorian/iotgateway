@@ -41,7 +41,7 @@ def send_amqp_message(broker, port, queue, message):
 
 class TestSenders(unittest.TestCase):
     def test_http_sender(self):
-        status_code, response = send_http_message("http://localhost:5000/http-receiver", "Test HTTP Message")
+        status_code, response = send_http_message("http://localhost:80/http-receiver", "Test HTTP Message")
         self.assertEqual(status_code, 200)
         self.assertIn("message", response)
 
