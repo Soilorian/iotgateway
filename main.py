@@ -1,8 +1,5 @@
-def main():
-    from infra import coapgateway, mqttgateway, amqpgateway
-    while True:
-        pass
+from infra.gateway import start_gateway
 
 
 if __name__ == '__main__':
-    main()
+    start_gateway()

@@ -1,13 +1,11 @@
 import pika
 import threading
+from config import amqp
 
 # AMQP Configuration
-AMQP_BROKER = "127.0.0.1"
-AMQP_PORT = 5672
-AMQP_QUEUE = "example_queue"
 
 # Initialize AMQP connection
-amqp_connection = pika.BlockingConnection(pika.ConnectionParameters(host=AMQP_BROKER, port=AMQP_PORT))
+amqp_connection = pika.BlockingConnection(pika.ConnectionParameters(host=amqp.BROKER, port=amqp.PORT))
 amqp_channel = amqp_connection.channel()
 amqp_channel.queue_declare(queue=AMQP_QUEUE)
 

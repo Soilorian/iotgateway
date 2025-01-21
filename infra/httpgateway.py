@@ -1,15 +1,29 @@
-from flask import Flask, request, jsonify
-
-app = Flask(__name__)
-
-
-# HTTP Endpoint to receive messages
-@app.route('/http-receiver', methods=['POST'])
-def http_receiver():
-    message = request.json.get('message')
-    print(f"HTTP: Received message: {message}")
-    return jsonify({"status": "received", "message": message}), 200
+from config.log import logger
+from infra.packetlistener import start_packet_listener
+from domain.valueobject import networkprotocol, transportprotocol
 
 
-app.run(debug=True, port=5000)
-print("started http receiver")
+def run_http_gateway(receive_buffer=4096):
+    def target_function(client_socket, client_address):
+        logger.info(f"http connection received from {client_address}")
+        try:
+            while True:
+                data = client_socket.recv(receive_buffer)
+                if not data:
+                    logger.warning("http client disconnected")
+                    break
+
+                logger.info(f"Received http data from {client_address}:")
+                data = data.decode('utf-8', errors='ignore')
+                print(data)
+
+        except Exception as e:
+            logger.warning(f"Error handling http client {client_address}: {e}")
+        finally:
+            client_socket.close()
+            logger.info(f"Connection closed with {client_address}")
+
+    start_packet_listener(port=80,
+                          target_function=target_function,
+                          network_protocol=networkprotocol.IPv4,
+                          transport_protocol=transportprotocol.TCP)
