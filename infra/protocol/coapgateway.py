@@ -1,6 +1,6 @@
 from config.log import logger
-from infra.packetlistener import start_packet_listener
-from domain.valueobject import networkprotocol, transportprotocol
+from infra.util.packetlistener import start_packet_listener
+from domain.aggregate.metadata.valueobject import networkprotocol, transportprotocol
 
 
 def run_coap_gateway(receive_buffer=4096):

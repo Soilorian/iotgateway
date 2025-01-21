@@ -1,0 +1,3 @@
+from domain.repository.devicerepository import DeviceRepository
+
+device_repository: DeviceRepository
