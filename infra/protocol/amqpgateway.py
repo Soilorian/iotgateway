@@ -1,26 +1,31 @@
-import pika
-import threading
-from config import amqp
-
-# AMQP Configuration
-
-# Initialize AMQP connection
-amqp_connection = pika.BlockingConnection(pika.ConnectionParameters(host=amqp.BROKER, port=amqp.PORT))
-amqp_channel = amqp_connection.channel()
-amqp_channel.queue_declare(queue=AMQP_QUEUE)
+from application.model.request.amqprequest import AMQPRequest
+from config.log import logger
+from domain.aggregate.metadata.valueobject import networkprotocol, transportprotocol
+from infra.util.packetlistener import start_packet_listener
 
 
-# Function to consume messages from AMQP
-def consume_amqp_messages():
-    def callback(ch, method, properties, body):
-        print(f"AMQP: Received message from queue {AMQP_QUEUE}: {body.decode('utf-8')}")
+def run_amqp_gateway(receive_buffer=4096):
+    def target_function(client_socket, client_address):
+        logger.info(f"AMQP connection received from {client_address}")
+        try:
+            while True:
+                data = client_socket.recv(receive_buffer)
+                if not data:
+                    logger.warning("AMQP client disconnected")
+                    break
 
-    amqp_channel.basic_consume(queue=AMQP_QUEUE, on_message_callback=callback, auto_ack=True)
-    print(f"AMQP: Listening for messages on queue {AMQP_QUEUE}")
-    amqp_channel.start_consuming()
+                # Decode AMQP data
+                amqp_request = AMQPRequest()
+                amqp_request.decode(data)
+                logger.info(f"Received AMQP data from {client_address}: {amqp_request}")
 
+        except Exception as e:
+            logger.warning(f"Error handling AMQP client {client_address}: {e}")
+        finally:
+            client_socket.close()
+            logger.info(f"AMQP connection closed with {client_address}")
 
-# Start AMQP consumer in a separate thread
-amqp_thread = threading.Thread(target=consume_amqp_messages, daemon=True)
-amqp_thread.start()
-print("started amqp receiver")
+    start_packet_listener(port=5672,
+                          target_function=target_function,
+                          network_protocol=networkprotocol.IPv4,
+                          transport_protocol=transportprotocol.TCP)

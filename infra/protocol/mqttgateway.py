@@ -1,26 +1,31 @@
-import logging
-import threading
-
-import paho.mqtt.client as mqtt
-
-# MQTT Configuration
-MQTT_BROKER = "127.0.0.1"
-MQTT_PORT = 1883
-MQTT_TOPIC = "example/topic"
+from application.model.request.mqttrequest import MQTTRequest
+from config.log import logger
+from domain.aggregate.metadata.valueobject import networkprotocol, transportprotocol
+from infra.util.packetlistener import start_packet_listener
 
 
-# MQTT on_message callback
-def on_mqtt_message(client, userdata, msg):
-    print(f"MQTT: Received message on topic {msg.topic}: {msg.payload.decode('utf-8')}")
+def run_mqtt_gateway(receive_buffer=4096):
+    def target_function(client_socket, client_address):
+        logger.info(f"MQTT connection received from {client_address}")
+        try:
+            while True:
+                data = client_socket.recv(receive_buffer)
+                if not data:
+                    logger.warning("MQTT client disconnected")
+                    break
 
+                # Decode MQTT data
+                mqtt_request = MQTTRequest()
+                mqtt_request.decode(data)
+                logger.info(f"Received MQTT data from {client_address}: {mqtt_request}")
 
-# Initialize MQTT client
-mqtt_client = mqtt.Client()
-mqtt_client.on_message = on_mqtt_message
-mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
-mqtt_client.subscribe(MQTT_TOPIC)
+        except Exception as e:
+            logger.warning(f"Error handling MQTT client {client_address}: {e}")
+        finally:
+            client_socket.close()
+            logger.info(f"MQTT connection closed with {client_address}")
 
-# Start MQTT loop in a separate thread
-mqtt_thread = threading.Thread(target=lambda: mqtt_client.loop_forever(), daemon=True)
-mqtt_thread.start()
-print("started mqtt receiver")
+    start_packet_listener(port=1883,
+                          target_function=target_function,
+                          network_protocol=networkprotocol.IPv4,
+                          transport_protocol=transportprotocol.TCP)
