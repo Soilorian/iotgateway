@@ -13,7 +13,3 @@ def consume_http_request(request: HttpRequest):
     path = Path(request)
     header = Header(request.headers)
     dest = request.headers["Host"]
-
-
-
-
