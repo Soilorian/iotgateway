@@ -4,6 +4,7 @@ from domain.aggregate.metadata.valueobject.address import Address
 from domain.aggregate.metadata.valueobject.path import Path
 from domain.aggregate.metadata.valueobject.payload import Payload
 from domain.aggregate.metadata.valueobject.port import Port
+from domain.repository.model.dto.listenerdto import ListenerDto
 
 
 class HttpIntegration:
@@ -14,5 +15,8 @@ class HttpIntegration:
                      destination_path: Path) -> HttpResponseDto:
         pass
 
-    def add_poller(self, request: HttpRequestDto) -> HttpResponseDto:
+    def add_poller(self, request: HttpRequestDto, listener: ListenerDto) -> HttpResponseDto:
+        pass
+
+    def stop_polling(self, listener):
         pass

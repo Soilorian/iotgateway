@@ -1,4 +1,4 @@
-class CoAPRequest:
+class CoapRequest:
     def __init__(self):
         self.version = None
         self.type = None

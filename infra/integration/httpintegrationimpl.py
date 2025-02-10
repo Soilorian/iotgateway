@@ -10,9 +10,11 @@ from domain.aggregate.metadata.valueobject.path import Path
 from domain.aggregate.metadata.valueobject.payload import Payload
 from domain.aggregate.metadata.valueobject.port import Port
 from domain.integration.httpintegration import HttpIntegration
+from domain.repository.model.dto.listenerdto import ListenerDto
 
 
 class HttpIntegrationImpl(HttpIntegration):
+    pollers: {ListenerDto: threading.Thread} = {}
 
     def send(self, request: HttpRequestDto) -> HttpResponseDto:
         """
@@ -32,10 +34,10 @@ class HttpIntegrationImpl(HttpIntegration):
                 headers=dict(response.headers),
                 body=response.json() if "application/json" in response.headers.get("Content-Type",
                                                                                    "") else response.text
-            )
+                , original_response=response)
         except requests.RequestException as e:
             print(f"HTTP Request failed: {e}")
-            return HttpResponseDto(status_code=500, headers={}, body=str(e))
+            return HttpResponseDto(status_code=500, headers={}, body=str(e), original_response=None)
 
     def send_payload(self, payload: Payload, destination_address: Address, destination_port: Port,
                      destination_path: Path) -> HttpResponseDto:
@@ -50,19 +52,20 @@ class HttpIntegrationImpl(HttpIntegration):
                 headers=dict(response.headers),
                 body=response.json() if "application/json" in response.headers.get("Content-Type",
                                                                                    "") else response.text
+                , original_response=response
             )
         except requests.RequestException as e:
             print(f"Payload sending failed: {e}")
-            return HttpResponseDto(status_code=500, headers={}, body=str(e))
+            return HttpResponseDto(status_code=500, headers={}, body=str(e), original_response=None)
 
-    def add_poller(self, request: HttpRequestDto):
+    def add_poller(self, request: HttpRequestDto, listener: ListenerDto):
         """
         Starts a polling thread to continuously check for updates using conditional GET requests.
         """
 
         def poll():
             last_etag = None
-            while True:
+            while listener in self.pollers.keys():
                 try:
                     response = self.send(request)
                     if response.status_code == 200:
@@ -73,10 +76,14 @@ class HttpIntegrationImpl(HttpIntegration):
                 except Exception as e:
                     print(f"Polling error: {e}")
 
-                time.sleep(5)  # Adjust polling interval as needed
+                time.sleep(1)
 
         thread = threading.Thread(target=poll, daemon=True)
         thread.start()
+        self.pollers[listener] = thread
         return HttpResponseDto(
-            status_code=200, headers={}, body="started listening"
+            status_code=200, headers={}, body="started listening", original_response=None
         )
+
+    def stop_poller(self, listener: ListenerDto):
+        self.pollers.pop(listener)

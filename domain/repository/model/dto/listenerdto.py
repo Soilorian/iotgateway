@@ -16,3 +16,6 @@ class ListenerDto:
         self.src_port = src_port
         self.dst_port = dst_port
         self.topic = topic
+
+    def __hash__(self):
+        return hash((self.src_address, self.dst_address, self.src_port, self.dst_port, self.topic))

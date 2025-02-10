@@ -1,10 +1,11 @@
 from domain.aggregate.metadata.model.dto.coaprequestdto import CoapRequestDto
+from domain.aggregate.metadata.model.dto.coapresponsedto import CoapResponseDto
 from domain.aggregate.metadata.valueobject.payload import Payload
 
 
 class CoapIntegration:
-    def send(self, request: CoapRequestDto):
+    def send(self, request: CoapRequestDto) -> CoapResponseDto:
         pass
 
-    def send_payload(self, payload: Payload):
+    def send_payload(self, payload: Payload) -> CoapResponseDto:
         pass

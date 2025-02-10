@@ -11,7 +11,7 @@ from infra.di.integration import http_integration
 from infra.di.repository import listener_repository
 
 
-def direct_to_http(cmd: DirectToHttpCmd) -> ResponseDto:
+def direct_to_http(cmd: DirectToHttpCmd) -> HttpResponseDto:
     response: HttpResponseDto
     action = cmd.metadata.action
     if cmd.metadata.sender_protocol is Protocol.HTTP:
@@ -20,7 +20,7 @@ def direct_to_http(cmd: DirectToHttpCmd) -> ResponseDto:
                                                  destination_port=cmd.destination_port,
                                                  destination_path=cmd.metadata.destination_path)
 
-    elif action not in [Action.PUBLISH, Action.SUBSCRIBE]:
+    elif action in [Action.GET, Action.POST, Action.PUT, Action.PATCH, Action.DELETE]:
         request = HttpRequestDto(
             method=action,
             path=cmd.metadata.destination_path,
@@ -33,6 +33,31 @@ def direct_to_http(cmd: DirectToHttpCmd) -> ResponseDto:
 
         response = http_integration.send(request)
 
+    elif action is Action.FETCH:
+        request = HttpRequestDto(
+            method=Action.GET,
+            path=cmd.metadata.destination_path,
+            query_params=cmd,
+            headers=cmd.metadata.header,
+            body=cmd.metadata.payload,
+            port=cmd.destination_port,
+            address=cmd.destination_address,
+        )
+
+        response = http_integration.send(request)
+
+    elif action is Action.DISCOVER:
+        request = HttpRequestDto(
+            method=Action.GET,
+            path="\\topics",
+            query_params=cmd,
+            headers=cmd.metadata.header,
+            body=cmd.metadata.payload,
+            port=cmd.destination_port,
+            address=cmd.destination_address,
+        )
+
+        response = http_integration.send(request)
     else:
         topic = Topic(cmd.metadata.destination_path.value)
         if action is Action.SUBSCRIBE:
@@ -56,7 +81,8 @@ def direct_to_http(cmd: DirectToHttpCmd) -> ResponseDto:
             )
 
             response = http_integration.add_poller(
-                request=request
+                request=request,
+                listener=listener,
             )
 
         elif action is Action.PUBLISH:
@@ -65,9 +91,9 @@ def direct_to_http(cmd: DirectToHttpCmd) -> ResponseDto:
                 dst_port=cmd.destination_port,
             )
 
-            if listener_exists(listeners=listeners, src_port=cmd.metadata.sender_port,
-                               src_address=cmd.metadata.sender_address,
-                               topic=Topic(cmd.metadata.destination_path.value)):
+            if find_listener(listeners=listeners, src_port=cmd.metadata.sender_port,
+                             src_address=cmd.metadata.sender_address,
+                             topic=Topic(cmd.metadata.destination_path.value)) is not None:
                 request = HttpRequestDto(
                     method=HttpMethod.POST,
                     path=cmd.metadata.destination_path,
@@ -80,16 +106,30 @@ def direct_to_http(cmd: DirectToHttpCmd) -> ResponseDto:
 
                 response = http_integration.send(request)
 
+        elif action is Action.UNSUBSCRIBE:
+            listeners = listener_repository.find(
+                dst_address=cmd.destination_address,
+                dst_port=cmd.destination_port,
+            )
+
+            listener = find_listener(listeners=listeners, src_port=cmd.metadata.sender_port,
+                             src_address=cmd.metadata.sender_address,
+                             topic=Topic(cmd.metadata.destination_path.value))
+
+            if listener:
+                http_integration.stop_polling(listener)
+
         else:
             raise NotImplemented
 
     return response
 
 
-def listener_exists(listeners, src_port, src_address, topic):
-    return any(
-        listener.src_port == src_port and
-        listener.src_address == src_address and
-        listener.topic == topic
-        for listener in listeners
+def find_listener(listeners, src_port, src_address, topic):
+    return next(
+        (listener for listener in listeners
+         if listener.src_port == src_port and
+         listener.src_address == src_address and
+         listener.topic == topic),
+        None  # Return None if no match is found
     )
