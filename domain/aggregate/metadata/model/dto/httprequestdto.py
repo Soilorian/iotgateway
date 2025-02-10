@@ -1,6 +1,9 @@
+from domain.aggregate.metadata.valueobject import HttpMethod
+
+
 class HttpRequestDto:
     def __init__(self,
-                 method,
+                 method: HttpMethod,
                  path,
                  query_params,
                  headers,

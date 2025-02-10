@@ -1,3 +1,6 @@
 from domain.repository.devicerepository import DeviceRepository
+from domain.repository.listenerrepository import ListenerRepository
 
 device_repository: DeviceRepository
+
+listener_repository: ListenerRepository

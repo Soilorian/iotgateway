@@ -3,7 +3,7 @@ from domain.aggregate.metadata.valueobject.address import Address
 from domain.aggregate.metadata.valueobject.port import Port
 
 
-class DirectToHttpCmd:
+class DirectToCoapCmd:
     destination_address: Address
     destination_port: Port
     metadata: Metadata
