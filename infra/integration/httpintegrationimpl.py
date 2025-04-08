@@ -85,5 +85,5 @@ class HttpIntegrationImpl(HttpIntegration):
             status_code=200, headers={}, body="started listening", original_response=None
         )
 
-    def stop_poller(self, listener: ListenerDto):
+    def stop_polling(self, listener: ListenerDto):
         self.pollers.pop(listener)

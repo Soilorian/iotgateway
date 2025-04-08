@@ -1,5 +1,6 @@
 from domain.aggregate.metadata.model.cmd.DirectToCoapCmd import DirectToCoapCmd
 from domain.aggregate.metadata.model.dto.coaprequestdto import CoapRequestDto
+from domain.aggregate.metadata.model.dto.coapresponsedto import CoapResponseDto
 from domain.aggregate.metadata.model.dto.responsedto import ResponseDto
 from domain.aggregate.metadata.valueobject.requesttype import Protocol
 from infra.di.integration import coap_integration

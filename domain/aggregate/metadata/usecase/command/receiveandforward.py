@@ -56,6 +56,10 @@ def receive_and_forward(cmd: ReceiveAndForwardCmd):
             original_response=coap_response.original_response
         )
 
+    # TODO add case for amqp protocol to call direct_to_amqp and construct the response here ostad
+
+    # TODO add case for amqp protocol to call direct_to_amqp and construct the response here saeed
+
     else:
         raise NotImplemented
 

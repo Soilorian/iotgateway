@@ -19,6 +19,10 @@ def run_mqtt_gateway(receive_buffer=4096):
                 mqtt_request.decode(data)
                 logger.info(f"Received MQTT data from {client_address}: {mqtt_request}")
 
+                # TODO call amqp consumer in gateway controller with needed inputs and get a result saeed
+
+                # TODO return the result as needed saeed
+
         except Exception as e:
             logger.warning(f"Error handling MQTT client {client_address}: {e}")
         finally:

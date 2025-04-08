@@ -14,10 +14,13 @@ def run_amqp_gateway(receive_buffer=4096):
                     logger.warning("AMQP client disconnected")
                     break
 
-                # Decode AMQP data
                 amqp_request = AMQPRequest()
                 amqp_request.decode(data)
                 logger.info(f"Received AMQP data from {client_address}: {amqp_request}")
+
+                # TODO call amqp consumer in gateway controller with needed inputs and get a result ostad
+
+                # TODO return the result as needed ostad
 
         except Exception as e:
             logger.warning(f"Error handling AMQP client {client_address}: {e}")

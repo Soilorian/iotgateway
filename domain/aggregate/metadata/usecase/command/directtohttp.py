@@ -1,7 +1,6 @@
 from domain.aggregate.metadata.model.cmd.DirectToHttpCmd import DirectToHttpCmd
 from domain.aggregate.metadata.model.dto.httprequestdto import HttpRequestDto
 from domain.aggregate.metadata.model.dto.httpresponsedto import HttpResponseDto
-from domain.aggregate.metadata.model.dto.responsedto import ResponseDto
 from domain.aggregate.metadata.valueobject.HttpMethod import HttpMethod
 from domain.aggregate.metadata.valueobject.action import Action
 from domain.aggregate.metadata.valueobject.requesttype import Protocol

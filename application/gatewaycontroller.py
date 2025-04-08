@@ -71,3 +71,8 @@ def consume_coap_request(request: CoapRequest) -> CoapResponseDto:
         message_id=0,
         payload=response.body,
     )
+
+
+# TODO add amqp consumer to get the amqp request, get its data and call receive and forward, and if needed return a response ostad
+
+# TODO add mqtt consumer to get the amqp request, get its data and call receive and forward, and if needed return a response saeed
