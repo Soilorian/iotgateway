@@ -60,4 +60,5 @@ class TestSenders(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    #unittest.main()
+    send_mqtt_message("localhost", 1883, "test/topic", "Test MQTT Message")
