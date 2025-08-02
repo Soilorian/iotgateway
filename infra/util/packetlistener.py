@@ -27,7 +27,6 @@ def start_packet_listener(
     try:
         while True:
             if transport_protocol == transportprotocol.UDP:
-                target_function(server_socket, None)
                 data, address = server_socket.recvfrom(receive_buffer)
                 if data:
                     target_function(data, address, server_socket)

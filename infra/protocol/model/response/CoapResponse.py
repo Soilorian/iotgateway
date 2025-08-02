@@ -1,7 +1,7 @@
 from domain.aggregate.metadata.model.dto.coapresponsedto import CoapResponseDto
 
 
-def encode_coap_response(dto: CoapResponseDto) -> bytes:
+def encode_coap_response(dto: CoapResponseDto, token: bytes) -> bytes:
     """
     Encodes the response as a raw CoAP message in bytes.
     """
@@ -16,7 +16,7 @@ def encode_coap_response(dto: CoapResponseDto) -> bytes:
     message_id_bytes = dto.message_id.to_bytes(2, byteorder='big')
 
     # Token (if any)
-    token_bytes = dto.token if dto.token else b''
+    token_bytes = token
 
     # Payload (if any)
     payload_bytes = b'\xFF' + dto.payload.encode('utf-8') if dto.payload else b''

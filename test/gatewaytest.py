@@ -48,7 +48,7 @@ class TestSenders(unittest.TestCase):
     def test_coap_sender(self):
         code, payload = send_coap_message("coap://localhost/resource", "Test CoAP Message")
         self.assertEqual(code, 69)  # 2.05 Changed
-        self.assertEqual(payload, b'test')
+        self.assertEqual(payload, "test")
 
     def test_mqtt_sender(self):
         result = send_mqtt_message("mqtt.example.com", 1883, "test/topic", "Test MQTT Message")
