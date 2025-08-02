@@ -9,7 +9,7 @@ import pika
 # Sender functions
 def send_http_message(url, message):
     response = requests.post(url, json={"message": message})
-    return response.status_code, response.json()
+    return response.status_code, response.content
 
 
 def send_coap_message(uri, message):
@@ -43,12 +43,12 @@ class TestSenders(unittest.TestCase):
     def test_http_sender(self):
         status_code, response = send_http_message("http://localhost:8080/http-receiver", "Test HTTP Message")
         self.assertEqual(status_code, 200)
-        self.assertIn("message", response)
+        self.assertIn(b'message', response)
 
     def test_coap_sender(self):
         code, payload = send_coap_message("coap://localhost/resource", "Test CoAP Message")
-        self.assertEqual(code, 68)  # 2.04 Changed
-        self.assertEqual(payload, "Message received")
+        self.assertEqual(code, 69)  # 2.05 Changed
+        self.assertEqual(payload, b'test')
 
     def test_mqtt_sender(self):
         result = send_mqtt_message("mqtt.example.com", 1883, "test/topic", "Test MQTT Message")

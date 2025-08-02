@@ -6,11 +6,15 @@ class CoapRequest:
         self.code = None
         self.payload = None
         self.options = {}
+        self.sender_addr = None
+        self.raw = None
 
-    def decode(self, raw_data):
+    def decode(self, raw_data, sender_addr):
         """
         Decodes raw CoAP request data (in bytes) and populates the class attributes.
         """
+        self.raw = raw_data
+        self.sender_addr = sender_addr
         if len(raw_data) < 4:
             raise ValueError("Invalid CoAP request: insufficient data")
 

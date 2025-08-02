@@ -22,7 +22,7 @@ def run_coap_gateway(receive_buffer=4096):
                 try:
                     # Decode the request
                     coap_request = CoapRequest()
-                    coap_request.decode(data)
+                    coap_request.decode(data, client_address)
                     logger.info(f"Decoded CoAP request: {coap_request}")
 
                     # Call consume_coap_request and get response
@@ -34,6 +34,7 @@ def run_coap_gateway(receive_buffer=4096):
                     # Send response
                     server_socket.sendto(response_bytes, address)
                     logger.info(f"Sent CoAP response to {address}: {coap_response_dto}")
+                    server_socket.close()
 
                 except Exception as e:
                     logger.error(f"Error processing CoAP request from {address}: {e}")

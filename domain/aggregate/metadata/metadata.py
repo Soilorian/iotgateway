@@ -17,15 +17,20 @@ class Metadata:
     sender_address: Address
     sender_port: Port
 
-
     def __init__(self,
                  action: Action,
                  header: Header,
                  path: Path,
                  request_type: Protocol,
-                 payload: Payload):
+                 payload: Payload,
+                 original_payload: Payload,
+                 sender_address: Address,
+                 sender_port: Port):
         self.action = action
         self.header = header
         self.destination_path = path
         self.sender_protocol = request_type
         self.payload = payload
+        self.original_payload = original_payload
+        self.sender_address = sender_address
+        self.sender_port = sender_port

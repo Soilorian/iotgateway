@@ -10,7 +10,7 @@ class DeviceDto:
     def __init__(self,
                  address: Address,
                  port: Port,
-                 protocol: protocol
+                 protocol: Protocol
                  ):
         self.address = address
         self.port = port

@@ -20,6 +20,9 @@ def receive_and_forward(cmd: ReceiveAndForwardCmd):
         path=cmd.path,
         request_type=cmd.request_type,
         payload=cmd.payload,
+        original_payload=cmd.raw,
+        sender_address=cmd.sender_addr,
+        sender_port=cmd.sender_addr,
     )
 
     response: ResponseDto
@@ -37,7 +40,8 @@ def receive_and_forward(cmd: ReceiveAndForwardCmd):
             status_code=http_response.status_code,
             headers=http_response.headers,
             body=http_response.body,
-            original_response=http_response.original_response
+            original_response=http_response.original_response,
+            type=Protocol.HTTP
         )
 
     elif device.protocol == Protocol.CoAP:

@@ -22,7 +22,7 @@ def run_http_gateway(receive_buffer=4096):
 
                 # Decode the HTTP request
                 request = HttpRequest()
-                request.decode(data)
+                request.decode(data, client_address)
 
                 # Process the request and get the response
                 response = consume_http_request(request)
@@ -31,6 +31,7 @@ def run_http_gateway(receive_buffer=4096):
                 # Send the response back to the client
                 client_socket.sendall(response_data)
                 logger.info(f"Response sent to {client_address}")
+                client_socket.close()
 
         except Exception as e:
             logger.warning(f"Error handling HTTP client {client_address}: {e}")

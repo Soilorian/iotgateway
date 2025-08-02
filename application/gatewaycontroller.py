@@ -1,6 +1,5 @@
 from application.model.request.coaprequest import CoapRequest
 from application.model.request.httprequest import HttpRequest
-from config.log import logger
 from domain.aggregate.metadata.model.cmd.receiveandforwardcmd import ReceiveAndForwardCmd
 from domain.aggregate.metadata.model.dto.coapresponsedto import CoapResponseDto
 from domain.aggregate.metadata.model.dto.httpresponsedto import HttpResponseDto
@@ -10,20 +9,21 @@ from domain.aggregate.metadata.valueobject.header import Header
 from domain.aggregate.metadata.valueobject.path import Path
 from domain.aggregate.metadata.valueobject.payload import Payload
 from domain.aggregate.metadata.valueobject.requesttype import Protocol
+from infra.adapter import adapter
 
 
 def consume_http_request(request: HttpRequest) -> HttpResponseDto:
     request_type = Protocol.HTTP
-    action = Action.get_action(request.method)
+    action = Action.get_action_with_name(request.method)
     payload = Payload(request.body)
     path = Path(request.path)
     header = Header(request.headers)
     destination = request.headers["Host"]
-    port = request.headers["Port"]
+    port = adapter.extract_port(request)
 
     response = receive_and_forward(
         ReceiveAndForwardCmd(destination=destination, port=port, request_type=request_type, action=action,
-                             payload=payload, path=path, header=header, ))
+                             payload=payload, path=path, header=header, sender_addr=request.sender_addr, raw=request.raw))
 
     if isinstance(response.original_response, HttpResponseDto):
         return response.original_response
@@ -57,20 +57,15 @@ def consume_coap_request(request: CoapRequest) -> CoapResponseDto:
             payload=payload,
             path=path,
             header=header,
+            sender_addr=request.sender_addr,
+            raw=request.raw,
         )
     )
 
     if isinstance(response.original_response, CoapResponseDto):
         return response.original_response
 
-    return CoapResponseDto(
-        version=request.version,
-        type_=request.type,
-        code=response.status_code,
-        token=request.token,
-        message_id=0,
-        payload=response.body,
-    )
+    return CoapResponseDto.fromResponse(response)
 
 
 # TODO add amqp consumer to get the amqp request, get its data and call receive and forward, and if needed return a response ostad

@@ -40,7 +40,7 @@ class Action(Enum):
             raise ValueError(f"Unsupported code: {value}")
 
     @staticmethod
-    def get_action(value: str):
+    def get_action_with_name(value: str):
         if value == "GET":
             return Action.GET
         elif value == "POST":

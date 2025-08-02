@@ -1,3 +1,5 @@
+import string
+
 from domain.aggregate.metadata.valueobject.action import Action
 from domain.aggregate.metadata.valueobject.address import Address
 from domain.aggregate.metadata.valueobject.header import Header
@@ -15,6 +17,8 @@ class ReceiveAndForwardCmd:
     payload: Payload
     path: Path
     header: Header
+    sender_addr: string
+    raw: string
 
     def __init__(self,
                  destination: Address,
@@ -24,6 +28,8 @@ class ReceiveAndForwardCmd:
                  path: Path,
                  header: Header,
                  port: Port,
+                 sender_addr: string,
+                 raw: string
                  ):
         self.destination = destination
         self.request_type = request_type
@@ -32,3 +38,5 @@ class ReceiveAndForwardCmd:
         self.path = path
         self.header = header
         self.port = port
+        self.sender_addr = sender_addr
+        self.raw = raw

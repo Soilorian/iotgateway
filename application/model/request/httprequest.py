@@ -8,11 +8,15 @@ class HttpRequest:
         self.query_params = {}
         self.headers = {}
         self.body = None
+        self.raw = None
+        self.sender_addr = None
 
-    def decode(self, raw_data):
+    def decode(self, raw_data, sender_addr):
         """
         Decodes raw HTTP request data and populates the class attributes.
         """
+        self.raw = raw_data
+        self.sender_addr = sender_addr
         lines = raw_data.split("\r\n")
         if not lines:
             raise ValueError("Empty HTTP request")
